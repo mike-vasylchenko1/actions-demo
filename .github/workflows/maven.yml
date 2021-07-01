@@ -23,10 +23,17 @@ jobs:
         distribution: 'adopt'
     - name: Build with Maven
       run: mvn -B package --file pom.xml
-  test:
+  deploy:
     runs-on: self-hosted
     if: success()
     needs: build
+    steps:
+      - name: deploy
+        run: echo "test deploy"
+  test:
+    runs-on: self-hosted
+    if: success()
+    needs: deploy
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11
