@@ -11,7 +11,6 @@ on:
 
 jobs:
   build:
-
     #runs-on: ubuntu-latest
     runs-on: self-hosted
 
@@ -24,3 +23,28 @@ jobs:
         distribution: 'adopt'
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+  deploy:
+    runs-on: self-hosted
+    if: success()
+    needs: build
+    steps:
+      - name: deploy
+        run: echo "test deploy"
+  test:
+    runs-on: self-hosted
+    if: success()
+    needs: deploy
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Check out my other private repo
+        uses: actions/checkout@master
+        with:
+          repository: mike-vasylchenko1/automated-tests
+          #token: ${{ secrets.my_pat }}
+      - name: Build with Maven
+        run: mvn clean test -Dhttps.protocols=TLSv1.2 -Dsurefire.suiteXmlFiles=src/test/resources/suite.xml
